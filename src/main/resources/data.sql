@@ -1,0 +1,21 @@
+INSERT INTO speciality (description)
+VALUES
+    ('Primary Care'),
+    ('Orthopedics'),
+    ('Ophthalmology'),
+    ('Cardiology'),
+    ('Dermatology'),
+    ('Endocrinology'),
+    ('Gastroenterology'),
+    ('Hematology'),
+    ('Oncology'),
+    ('Nephrology'),
+    ('Pulmonology'),
+    ('Rheumatology'),
+    ('Neurology'),
+    ('Obstetrics & Gynecology'),
+    ('Internal Medicine'),
+    ('Pediatrics'),
+    ('Geriatrics'),
+    ('Psychiatry'),
+    ('Urology');
