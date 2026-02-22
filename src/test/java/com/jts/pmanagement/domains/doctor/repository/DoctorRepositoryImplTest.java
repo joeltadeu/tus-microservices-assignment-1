@@ -179,6 +179,18 @@ class DoctorRepositoryImplTest {
   }
 
   @Test
+  @DisplayName("findAllWithFilters - should filter by lastName (partial match)")
+  void shouldFilterByLastName() {
+    DoctorFilter filter = new DoctorFilter();
+    filter.setLastName("Doe");
+
+    Page<Doctor> result = doctorRepository.findAllWithFilters(filter);
+
+    assertThat(result.getTotalElements()).isEqualTo(1);
+    assertThat(result.getContent().getFirst().getLastName()).isEqualTo("Doe");
+  }
+
+  @Test
   @DisplayName("findAllWithFilters - should filter by email")
   void shouldFilterByEmail() {
     DoctorFilter filter = new DoctorFilter();

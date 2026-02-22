@@ -70,7 +70,7 @@ public class DoctorRepositoryImpl implements DoctorRepositoryCustom {
       predicates.add(
           criteriaBuilder.like(
               criteriaBuilder.lower(doctorRoot.get("lastName")),
-              "%" + criteria.getFirstName().toLowerCase(Locale.ROOT) + "%"));
+              "%" + criteria.getLastName().toLowerCase(Locale.ROOT) + "%"));
     }
 
     if (Objects.nonNull(criteria.getEmail())) {
@@ -91,15 +91,6 @@ public class DoctorRepositoryImpl implements DoctorRepositoryCustom {
     }
 
     return predicates.isEmpty() ? null : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-  }
-
-  private void setOrder(
-      DoctorFilter page, CriteriaQuery<Doctor> criteriaQuery, Root<Doctor> doctorRoot) {
-    if (page.getSortDirection().equals(Sort.Direction.ASC)) {
-      criteriaQuery.orderBy(criteriaBuilder.asc(doctorRoot.get(page.getSortBy())));
-    } else {
-      criteriaQuery.orderBy(criteriaBuilder.desc(doctorRoot.get(page.getSortBy())));
-    }
   }
 
   private Pageable getPageable(DoctorFilter page) {

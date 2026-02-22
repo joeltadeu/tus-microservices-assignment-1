@@ -38,11 +38,4 @@ public class ExceptionResponse {
     this.date = LocalDateTime.now().toString();
     this.attributes = new ArrayList<>();
   }
-
-  public ExceptionResponse(HttpStatus httpStatus) {
-    this.code = httpStatus.value();
-    this.status = httpStatus.getReasonPhrase();
-    this.date = LocalDateTime.now().toString();
-    this.attributes = new ArrayList<>();
-  }
 }

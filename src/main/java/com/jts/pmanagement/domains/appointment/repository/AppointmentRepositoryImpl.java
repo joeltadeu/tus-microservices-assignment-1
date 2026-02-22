@@ -30,10 +30,7 @@ public class AppointmentRepositoryImpl implements AppointmentRepositoryCustom {
     Root<Appointment> root = query.from(Appointment.class);
 
     // Get predicate for the main query
-    Predicate predicate = getPredicate(patientId, filter, root);
-    if (predicate != null) {
-      query.where(predicate);
-    }
+    query.where(getPredicate(patientId, filter, root));
 
     Pageable pageable = getPageable(filter);
 
@@ -78,18 +75,7 @@ public class AppointmentRepositoryImpl implements AppointmentRepositoryCustom {
       predicates.add(criteriaBuilder.equal(root.get("status"), criteria.getStatus()));
     }
 
-    return predicates.isEmpty() ? null : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-  }
-
-  private void setOrder(
-      AppointmentFilter page,
-      CriteriaQuery<Appointment> criteriaQuery,
-      Root<Appointment> patientRoot) {
-    if (page.getSortDirection().equals(Sort.Direction.ASC)) {
-      criteriaQuery.orderBy(criteriaBuilder.asc(patientRoot.get(page.getSortBy())));
-    } else {
-      criteriaQuery.orderBy(criteriaBuilder.desc(patientRoot.get(page.getSortBy())));
-    }
+    return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
   }
 
   private Pageable getPageable(AppointmentFilter page) {

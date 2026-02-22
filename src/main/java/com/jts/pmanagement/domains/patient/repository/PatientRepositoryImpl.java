@@ -78,15 +78,6 @@ public class PatientRepositoryImpl implements PatientRepositoryCustom {
     return predicates.isEmpty() ? null : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
   }
 
-  private void setOrder(
-      PatientFilter page, CriteriaQuery<Patient> criteriaQuery, Root<Patient> patientRoot) {
-    if (page.getSortDirection().equals(Sort.Direction.ASC)) {
-      criteriaQuery.orderBy(criteriaBuilder.asc(patientRoot.get(page.getSortBy())));
-    } else {
-      criteriaQuery.orderBy(criteriaBuilder.desc(patientRoot.get(page.getSortBy())));
-    }
-  }
-
   private Pageable getPageable(PatientFilter page) {
     Sort sort = Sort.by(page.getSortDirection(), page.getSortBy());
     return PageRequest.of(page.getPageNumber(), page.getPageSize(), sort);
