@@ -1,0 +1,760 @@
+{
+  "info": {
+    "_postman_id": "2ecb32cc-0a2e-4b29-a31c-aebd84c674be",
+    "name": "tus-microservices-assignment-1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "3024621"
+  },
+  "item": [
+    {
+      "name": "doctor",
+      "item": [
+        {
+          "name": "create",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "function randomInRange(min, max) {\r",
+                  "    return Math.floor(Math.random() * (max - min + 1)) + min;\r",
+                  "}\r",
+                  "\r",
+                  "let specialityId = randomInRange(1, 7);\r",
+                  "pm.collectionVariables.set(\"specialityId\", specialityId);\r",
+                  "\r",
+                  "let firstName = pm.variables.replaceIn('{{$randomFirstName}}');\r",
+                  "let lastName = pm.variables.replaceIn('{{$randomLastName}}');\r",
+                  "\r",
+                  "pm.collectionVariables.set(\"firstName\", firstName);\r",
+                  "pm.collectionVariables.set(\"lastName\", lastName);\r",
+                  "pm.collectionVariables.set(\"email\", firstName.toLowerCase()+'.'+lastName.toLowerCase()+'@medicalclinic.com');\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "pm.collectionVariables.set(\"doctorId\", jsonData.id);\r",
+                  "\r",
+                  "pm.collectionVariables.set(\"firstName\", jsonData.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstName\": \"{{firstName}}\",\r\n  \"lastName\": \"{{lastName}}\",\r\n  \"title\": \"Dr.\",\r\n  \"specialityId\": {{specialityId}},\r\n  \"email\": \"{{email}}\",\r\n  \"phone\": \"{{$randomPhoneNumber}}\",\r\n  \"department\": \"Primary Care\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{doctor-url}}/v1/doctors",
+              "host": [
+                "{{doctor-url}}"
+              ],
+              "path": [
+                "v1",
+                "doctors"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{doctor-url}}/v1/doctors/{{doctorId}}",
+              "host": [
+                "{{doctor-url}}"
+              ],
+              "path": [
+                "v1",
+                "doctors",
+                "{{doctorId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstName\": \"{{firstName}}\",\r\n  \"lastName\": \"{{lastName}}\",\r\n  \"title\": \"Dr.\",\r\n  \"specialityId\": 2,\r\n  \"email\": \"{{email}}\",\r\n  \"phone\": \"{{$randomPhoneNumber}}\",\r\n  \"department\": \"Primary Care\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{doctor-url}}/v1/doctors/{{doctorId}}",
+              "host": [
+                "{{doctor-url}}"
+              ],
+              "path": [
+                "v1",
+                "doctors",
+                "{{doctorId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{doctor-url}}/v1/doctors",
+              "host": [
+                "{{doctor-url}}"
+              ],
+              "path": [
+                "v1",
+                "doctors"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{doctor-url}}/v1/doctors/{{doctorId}}",
+              "host": [
+                "{{doctor-url}}"
+              ],
+              "path": [
+                "v1",
+                "doctors",
+                "{{doctorId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "actuator",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{doctor-url}}/actuator/health",
+              "host": [
+                "{{doctor-url}}"
+              ],
+              "path": [
+                "actuator",
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "patient",
+      "item": [
+        {
+          "name": "create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "pm.collectionVariables.set(\"patientId\", jsonData.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "function generateRandomDateOfBirth(startYear, endYear) {\r",
+                  "    const year = Math.floor(Math.random() * (endYear - startYear + 1)) + startYear;\r",
+                  "    const month = Math.floor(Math.random() * 12) + 1;\r",
+                  "\r",
+                  "    // Get correct max days per month (handles leap years)\r",
+                  "    const daysInMonth = new Date(year, month, 0).getDate();\r",
+                  "    const day = Math.floor(Math.random() * daysInMonth) + 1;\r",
+                  "\r",
+                  "    // Zero-pad month and day\r",
+                  "    const mm = month.toString().padStart(2, \"0\");\r",
+                  "    const dd = day.toString().padStart(2, \"0\");\r",
+                  "\r",
+                  "    return `${year}-${mm}-${dd}`;\r",
+                  "}\r",
+                  "\r",
+                  "// Generate DOB\r",
+                  "const dob = generateRandomDateOfBirth(1965, 2023);\r",
+                  "\r",
+                  "// Store as collection variable\r",
+                  "pm.collectionVariables.set(\"dateOfBirth\", dob);\r",
+                  "\r",
+                  "\r",
+                  "function generateRandomAddress() {\r",
+                  "    const streets = [\r",
+                  "        \"Main Street\",\r",
+                  "        \"Oak Avenue\",\r",
+                  "        \"Maple Road\",\r",
+                  "        \"Pine Street\",\r",
+                  "        \"Cedar Lane\",\r",
+                  "        \"Sunset Boulevard\",\r",
+                  "        \"Washington Ave\",\r",
+                  "        \"Lakeview Drive\"\r",
+                  "    ];\r",
+                  "\r",
+                  "    const cities = [\r",
+                  "        { city: \"New York\", zipPrefix: \"100\" },\r",
+                  "        { city: \"Los Angeles\", zipPrefix: \"900\" },\r",
+                  "        { city: \"Chicago\", zipPrefix: \"606\" },\r",
+                  "        { city: \"Houston\", zipPrefix: \"770\" },\r",
+                  "        { city: \"Phoenix\", zipPrefix: \"850\" },\r",
+                  "        { city: \"Seattle\", zipPrefix: \"981\" },\r",
+                  "        { city: \"Miami\", zipPrefix: \"331\" }\r",
+                  "    ];\r",
+                  "\r",
+                  "    const street = streets[Math.floor(Math.random() * streets.length)];\r",
+                  "    const number = Math.floor(Math.random() * 9000) + 100;\r",
+                  "    const cityObj = cities[Math.floor(Math.random() * cities.length)];\r",
+                  "    const zipcode = `${cityObj.zipPrefix}${Math.floor(Math.random() * 100).toString().padStart(2, \"0\")}`;\r",
+                  "\r",
+                  "    return {\r",
+                  "        street: `${number} ${street}`,\r",
+                  "        city: cityObj.city,\r",
+                  "        zipcode: zipcode\r",
+                  "    };\r",
+                  "}\r",
+                  "\r",
+                  "// Generate address\r",
+                  "const address = generateRandomAddress();\r",
+                  "\r",
+                  "// Store as collection or environment variables\r",
+                  "pm.collectionVariables.set(\"street\", address.street);\r",
+                  "pm.collectionVariables.set(\"city\", address.city);\r",
+                  "pm.collectionVariables.set(\"zipcode\", address.zipcode);\r",
+                  "\r",
+                  "// Optional combined address\r",
+                  "pm.collectionVariables.set(\r",
+                  "    \"fullAddress\",\r",
+                  "    `${address.street}, ${address.city}, ${address.zipcode}`\r",
+                  ");\r",
+                  "\r",
+                  "let firstName = pm.variables.replaceIn('{{$randomFirstName}}');\r",
+                  "let lastName = pm.variables.replaceIn('{{$randomLastName}}');\r",
+                  "pm.collectionVariables.set(\"firstName\", firstName);\r",
+                  "pm.collectionVariables.set(\"lastName\", lastName);\r",
+                  "pm.collectionVariables.set(\"email\", firstName.toLowerCase()+'.'+lastName.toLowerCase()+'@gmail.com');"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"firstName\": \"{{firstName}}\",\r\n    \"lastName\": \"{{lastName}}\",\r\n    \"email\": \"{{email}}\",\r\n    \"dateOfBirth\": \"{{dateOfBirth}}\",\r\n    \"address\": \"{{fullAddress}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{patient-url}}/v1/patients",
+              "host": [
+                "{{patient-url}}"
+              ],
+              "path": [
+                "v1",
+                "patients"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"firstName\": \"{{firstName}}\",\r\n    \"lastName\": \"{{lastName}}\",\r\n    \"email\": \"{{email}}\",\r\n    \"dateOfBirth\": \"1980-09-30\",\r\n    \"address\": \"3456 Fox Street, California, 32121\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{patient-url}}/v1/patients/{{patientId}}",
+              "host": [
+                "{{patient-url}}"
+              ],
+              "path": [
+                "v1",
+                "patients",
+                "{{patientId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{patient-url}}/v1/patients",
+              "host": [
+                "{{patient-url}}"
+              ],
+              "path": [
+                "v1",
+                "patients"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{patient-url}}/v1/patients/{{patientId}}",
+              "host": [
+                "{{patient-url}}"
+              ],
+              "path": [
+                "v1",
+                "patients",
+                "{{patientId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{patient-url}}/v1/patients/{{patientId}}",
+              "host": [
+                "{{patient-url}}"
+              ],
+              "path": [
+                "v1",
+                "patients",
+                "{{patientId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "appointment",
+      "item": [
+        {
+          "name": "create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "pm.collectionVariables.set(\"appointmentId\", jsonData.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Map of specialities with title + description templates\r",
+                  "const specialities = {\r",
+                  "    1: {\r",
+                  "        name: \"Primary Care\",\r",
+                  "        title: \"General Health Consultation\",\r",
+                  "        description: \"Routine evaluation of overall health, symptoms, and preventive care needs.\"\r",
+                  "    },\r",
+                  "    2: {\r",
+                  "        name: \"Orthopedics\",\r",
+                  "        title: \"Orthopedic Consultation\",\r",
+                  "        description: \"Assessment of bones, joints, or muscle-related pain or injuries.\"\r",
+                  "    },\r",
+                  "    3: {\r",
+                  "        name: \"Ophthalmology\",\r",
+                  "        title: \"Eye Health Consultation\",\r",
+                  "        description: \"Evaluation of vision issues, eye discomfort, or routine eye examination.\"\r",
+                  "    },\r",
+                  "    4: {\r",
+                  "        name: \"Cardiology\",\r",
+                  "        title: \"Cardiology Consultation\",\r",
+                  "        description: \"Assessment of heart-related symptoms such as chest pain, palpitations, or shortness of breath.\"\r",
+                  "    },\r",
+                  "    5: {\r",
+                  "        name: \"Dermatology\",\r",
+                  "        title: \"Skin Health Consultation\",\r",
+                  "        description: \"Examination of skin conditions such as rashes, acne, irritation, or lesions.\"\r",
+                  "    },\r",
+                  "    6: {\r",
+                  "        name: \"Endocrinology\",\r",
+                  "        title: \"Endocrine System Consultation\",\r",
+                  "        description: \"Evaluation of hormonal or metabolic concerns such as thyroid or glucose issues.\"\r",
+                  "    },\r",
+                  "    7: {\r",
+                  "        name: \"Gastroenterology\",\r",
+                  "        title: \"Digestive Health Consultation\",\r",
+                  "        description: \"Assessment of stomach, intestinal, or digestive discomfort or symptoms.\"\r",
+                  "    }\r",
+                  "};\r",
+                  "\r",
+                  "const specialityId = pm.variables.get(\"specialityId\");\r",
+                  "\r",
+                  "// Extract the selected speciality\r",
+                  "const selected = specialities[specialityId];\r",
+                  "pm.collectionVariables.set(\"title\", selected.title);\r",
+                  "pm.collectionVariables.set(\"description\", selected.description);\r",
+                  "\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"{{title}}\",\r\n    \"type\": \"CONSULTATION\", \r\n    \"startTime\": \"2026-04-03T10:00:00\",\r\n    \"doctorId\": {{doctorId}},\r\n    \"description\": \"{{description}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{appointment-url}}/v1/patients/{{patientId}}/appointments",
+              "host": [
+                "{{appointment-url}}"
+              ],
+              "path": [
+                "v1",
+                "patients",
+                "{{patientId}}",
+                "appointments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"{{title}}\",\r\n    \"type\": \"CONSULTATION\", \r\n    \"startTime\": \"2026-02-18T15:30:00\",\r\n    \"doctorId\": {{doctorId}},\r\n    \"description\": \"{{description}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{appointment-url}}/v1/patients/{{patientId}}/appointments/{{appointmentId}}",
+              "host": [
+                "{{appointment-url}}"
+              ],
+              "path": [
+                "v1",
+                "patients",
+                "{{patientId}}",
+                "appointments",
+                "{{appointmentId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{appointment-url}}/v1/patients/{{patientId}}/appointments/{{appointmentId}}",
+              "host": [
+                "{{appointment-url}}"
+              ],
+              "path": [
+                "v1",
+                "patients",
+                "{{patientId}}",
+                "appointments",
+                "{{appointmentId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{appointment-url}}/v1/patients/{{patientId}}/appointments?startDate=2026-04-01&endDate=2026-04-20",
+              "host": [
+                "{{appointment-url}}"
+              ],
+              "path": [
+                "v1",
+                "patients",
+                "{{patientId}}",
+                "appointments"
+              ],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-04-20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cancel",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"reason\": \"Unable to get transportation\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{appointment-url}}/v1/patients/{{patientId}}/appointments/{{appointmentId}}/cancel",
+              "host": [
+                "{{appointment-url}}"
+              ],
+              "path": [
+                "v1",
+                "patients",
+                "{{patientId}}",
+                "appointments",
+                "{{appointmentId}}",
+                "cancel"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{appointment-url}}/v1/patients/{{patientId}}/appointments/{{appointmentId}}",
+              "host": [
+                "{{appointment-url}}"
+              ],
+              "path": [
+                "v1",
+                "patients",
+                "{{patientId}}",
+                "appointments",
+                "{{appointmentId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "doctorId",
+      "value": ""
+    },
+    {
+      "key": "firstName",
+      "value": ""
+    },
+    {
+      "key": "lastName",
+      "value": ""
+    },
+    {
+      "key": "email",
+      "value": ""
+    },
+    {
+      "key": "dateOfBirth",
+      "value": ""
+    },
+    {
+      "key": "street",
+      "value": ""
+    },
+    {
+      "key": "city",
+      "value": ""
+    },
+    {
+      "key": "zipcode",
+      "value": ""
+    },
+    {
+      "key": "fullAddress",
+      "value": ""
+    },
+    {
+      "key": "name",
+      "value": ""
+    },
+    {
+      "key": "patientId",
+      "value": ""
+    },
+    {
+      "key": "appointmentId",
+      "value": ""
+    },
+    {
+      "key": "specialityId",
+      "value": ""
+    },
+    {
+      "key": "title",
+      "value": ""
+    },
+    {
+      "key": "description",
+      "value": ""
+    }
+  ]
+}
