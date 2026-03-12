@@ -35,7 +35,7 @@ jenkins:
           - key: GITHUB_REPO_URL
             value: "https://github.com/joeltadeu/tus-microservices-assignment-1.git"
           - key: GITHUB_REPO_BRANCH
-            value: "main"
+            value: "master"
 
 
 
@@ -70,8 +70,6 @@ credentials:
           # Leave as-is if repo is public (token only needed for webhooks or private repos)
           - usernamePassword:
               id: "GITHUB_CREDENTIALS"
-              username: "joeltadeu"
-              password: "ghp_REPLACE_WITH_YOUR_GITHUB_PAT"
               description: "GitHub Personal Access Token"
               scope: GLOBAL
 
