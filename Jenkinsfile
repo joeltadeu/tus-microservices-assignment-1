@@ -22,7 +22,7 @@ pipeline {
 
     environment {
         GITHUB_REPO      = 'https://github.com/joeltadeu/tus-microservices-assignment-1.git'
-        GITHUB_BRANCH    = 'main'
+        GITHUB_BRANCH    = 'master'
         APP_NAME         = 'pmanagement-service'
         APP_IMAGE        = "pmanagement-service:${BUILD_NUMBER}"
         APP_IMAGE_LATEST = 'pmanagement-service:latest'
