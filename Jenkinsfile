@@ -69,7 +69,7 @@ pipeline {
                 echo '==> Compiling and packaging application'
                 sh '''
                     mvn clean package \
-                        -DskipTests \
+                        -Dmaven.test.skip=true \
                         --batch-mode \
                         --no-transfer-progress
                 '''
@@ -159,9 +159,7 @@ pipeline {
                     mvn verify \
                         -DskipUnitTests=true \
                         --batch-mode \
-                        --no-transfer-progress \
-                        -Dkarate.options="--tags ~@ignore" \
-                        -Dkarate.env=e2e
+                        --no-transfer-progress
                 '''
             }
             post {

@@ -129,3 +129,10 @@ else
     echo "  → Go to ${SONAR_URL} → My Account → Security → Generate Token"
     echo "  → Add it to Jenkins: Manage Jenkins → Credentials → SONAR_TOKEN"
 fi
+
+# 5. Register Jenkins webhook
+echo "[sonar-setup] Registering Jenkins webhook..."
+curl -sf -u "${AUTH}" \
+    -X POST "${SONAR_URL}/api/webhooks/create" \
+    -d "name=Jenkins&url=http://jenkins:8080/sonarqube-webhook/" \
+    || echo "[sonar-setup] Webhook may already exist – continuing"
