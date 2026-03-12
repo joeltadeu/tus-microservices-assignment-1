@@ -1,0 +1,17 @@
+workflow-aggregator
+git
+github
+github-branch-source
+pipeline-stage-view
+sonar
+jacoco
+docker-workflow
+docker-plugin
+configuration-as-code
+credentials-binding
+timestamper
+build-timeout
+ws-cleanup
+pipeline-maven
+junit
+job-dsl
