@@ -31,6 +31,8 @@ pipeline {
         SONAR_PROJECT    = 'pmanagement-service'
         SONAR_TOKEN      = credentials('SONAR_TOKEN')
         MAVEN_OPTS       = '-Xmx1g'
+        // Disable Jenkins CSP so JaCoCo and Karate HTML reports render correctly
+        JAVA_TOOL_OPTIONS = '-Dhudson.model.DirectoryBrowserSupport.CSP='
     }
 
     stages {
@@ -110,10 +112,11 @@ pipeline {
                         changeBuildStatus: true
                     )
 
-                    // ← ADDED: archive JaCoCo HTML report as a build artifact
                     archiveArtifacts artifacts: 'target/site/jacoco/**/*',
                                      fingerprint: false,
                                      allowEmptyArchive: true
+
+                    echo "==> JaCoCo Report: ${BUILD_URL}artifact/target/site/jacoco/index.html"
                 }
             }
         }
@@ -167,10 +170,11 @@ pipeline {
                     junit testResults: 'target/failsafe-reports/*.xml',
                           allowEmptyResults: true
 
-                    // ← ADDED: archive Karate HTML report as a build artifact
                     archiveArtifacts artifacts: 'target/karate-reports/**/*',
                                      fingerprint: false,
                                      allowEmptyArchive: true
+
+                    echo "==> Karate Report: ${BUILD_URL}artifact/target/karate-reports/karate-summary.html"
                 }
             }
         }

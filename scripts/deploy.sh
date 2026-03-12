@@ -31,6 +31,7 @@ docker run -d \
 
 # Health check – wait up to 60 seconds
 echo "[deploy] Waiting for health check..."
+sleep 10
 for i in $(seq 1 12); do
     STATUS=$(curl -sf "http://localhost:${HOST_PORT}/actuator/health" \
              | grep -o '"status":"[^"]*"' | head -1 || true)
