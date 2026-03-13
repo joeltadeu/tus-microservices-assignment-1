@@ -15,4 +15,4 @@ ws-cleanup
 pipeline-maven
 junit
 job-dsl
-html-publisher
+htmlpublisher

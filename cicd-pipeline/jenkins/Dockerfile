@@ -1,5 +1,5 @@
 # Custom Jenkins image with pre-installed plugins + Docker CLI
-FROM jenkins/jenkins:2.479.3-lts-jdk21
+FROM jenkins/jenkins:latest-jdk21
 
 USER root
 
