@@ -9,7 +9,7 @@ IMAGE="${1:-pmanagement-service:latest}"
 HOST_PORT="${2:-9081}"
 CONTAINER_NAME="pmanagement-service"
 HEALTH_URL="http://localhost:${HOST_PORT}/actuator/health"
-MAX_WAIT=90
+MAX_WAIT=180
 POLL_INTERVAL=5
 
 echo "──────────────────────────────────────────────"
