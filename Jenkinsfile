@@ -116,7 +116,7 @@ pipeline {
                                      fingerprint: false,
                                      allowEmptyArchive: true
 
-                    echo "==> JaCoCo Report: ${BUILD_URL}artifact/target/site/jacoco/index.html"
+                    echo "==> JaCoCo Report: ${env.BUILD_URL}artifact/target/site/jacoco/index.html"
                 }
             }
         }
@@ -174,7 +174,7 @@ pipeline {
                                      fingerprint: false,
                                      allowEmptyArchive: true
 
-                    echo "==> Karate Report: ${BUILD_URL}artifact/target/karate-reports/karate-summary.html"
+                    echo "==> Karate Report: ${env.BUILD_URL}artifact/target/karate-reports/karate-summary.html"
                 }
             }
         }
