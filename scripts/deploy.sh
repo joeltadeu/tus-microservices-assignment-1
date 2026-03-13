@@ -8,8 +8,8 @@ set -euo pipefail
 IMAGE="${1:-pmanagement-service:latest}"
 HOST_PORT="${2:-9081}"
 CONTAINER_NAME="pmanagement-service"
-HEALTH_URL="http://localhost:${HOST_PORT}/actuator/health"
-MAX_WAIT=180
+HEALTH_URL="http://host.docker.internal:${HOST_PORT}/actuator/health"
+MAX_WAIT=90
 POLL_INTERVAL=5
 
 echo "──────────────────────────────────────────────"
@@ -76,13 +76,15 @@ echo "[deploy] Waiting for application to start..."
 ATTEMPTS=$(( MAX_WAIT / POLL_INTERVAL ))
 for i in $(seq 1 "${ATTEMPTS}"); do
     sleep "${POLL_INTERVAL}"
-    STATUS=$(curl -sf "${HEALTH_URL}" | grep -o '"status":"[^"]*"' | head -1 || true)
+    STATUS=$(docker exec "${CONTAINER_NAME}" \
+        sh -c 'wget -qO- http://localhost:9081/actuator/health 2>/dev/null || true' \
+        | grep -o '"status":"[^"]*"' | head -1 || true)
     if echo "${STATUS}" | grep -q "UP"; then
         echo "[deploy] ✅ Application is UP (attempt ${i}/${ATTEMPTS})"
         echo "──────────────────────────────────────────────"
         echo " App       → http://localhost:${HOST_PORT}"
         echo " Swagger   → http://localhost:${HOST_PORT}/swagger-ui.html"
-        echo " Health    → ${HEALTH_URL}"
+        echo " Health    → http://localhost:${HOST_PORT}/actuator/health"
         echo " H2 Console→ http://localhost:${HOST_PORT}/h2-console"
         echo "──────────────────────────────────────────────"
         exit 0
