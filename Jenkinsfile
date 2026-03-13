@@ -112,11 +112,16 @@ pipeline {
                         changeBuildStatus: true
                     )
 
-                    archiveArtifacts artifacts: 'target/site/jacoco/**/*',
-                                     fingerprint: false,
-                                     allowEmptyArchive: true
-
-                    echo "==> JaCoCo Report: ${env.BUILD_URL}artifact/target/site/jacoco/index.html"
+                    publishHTML(target: [
+                        allowMissing:          false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll:               true,
+                        reportDir:             'target/site/jacoco',
+                        reportFiles:           'index.html',
+                        reportName:            'JaCoCo Coverage Report',
+                        reportTitles:          'Coverage'
+                    ])
+                    echo "==> JaCoCo Report: ${env.BUILD_URL}JaCoCo_20Coverage_20Report/"
                 }
             }
         }
@@ -170,11 +175,16 @@ pipeline {
                     junit testResults: 'target/failsafe-reports/*.xml',
                           allowEmptyResults: true
 
-                    archiveArtifacts artifacts: 'target/karate-reports/**/*',
-                                     fingerprint: false,
-                                     allowEmptyArchive: true
-
-                    echo "==> Karate Report: ${env.BUILD_URL}artifact/target/karate-reports/karate-summary.html"
+                    publishHTML(target: [
+                        allowMissing:          true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll:               true,
+                        reportDir:             'target/karate-reports',
+                        reportFiles:           'karate-summary.html',
+                        reportName:            'Karate E2E Report',
+                        reportTitles:          'Karate'
+                    ])
+                    echo "==> Karate Report: ${env.BUILD_URL}Karate_20E2E_20Report/"
                 }
             }
         }
