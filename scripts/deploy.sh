@@ -65,6 +65,7 @@ fi
 
 # ── Start new container ───────────────────────────────────────
 echo "[deploy] Starting container: ${CONTAINER_NAME}"
+echo "[deploy] network name: ${NETWORK_NAME}"
 docker run -d \
     --name "${CONTAINER_NAME}" \
     --network "${NETWORK_NAME}" \
@@ -78,9 +79,17 @@ echo "[deploy] Waiting for application to start..."
 ATTEMPTS=$(( MAX_WAIT / POLL_INTERVAL ))
 for i in $(seq 1 "${ATTEMPTS}"); do
     sleep "${POLL_INTERVAL}"
-    STATUS=$(docker exec "${CONTAINER_NAME}" \
-        sh -c 'wget -qO- http://localhost:9081/actuator/health 2>/dev/null || true' \
+    STATUS=$(curl -sf "${HEALTH_URL}" \
         | grep -o '"status":"[^"]*"' | head -1 || true)
+    echo "[deploy] Status: ${STATUS}"
+    STATUS1=$(docker exec "${CONTAINER_NAME}" \
+            sh -c 'wget -qO- http://localhost:9081/actuator/health 2>/dev/null || true' \
+            | grep -o '"status":"[^"]*"' | head -1 || true)
+    echo "[deploy] Status1: ${STATUS1}"
+    STATUS2=$(docker exec "${CONTAINER_NAME}" \
+                sh -c 'wget -qO- http://host.docker.internal:9081/actuator/health 2>/dev/null || true' \
+                | grep -o '"status":"[^"]*"' | head -1 || true)
+    echo "[deploy] Status2: ${STATUS2}"
     if echo "${STATUS}" | grep -q "UP"; then
         echo "[deploy] ✅ Application is UP (attempt ${i}/${ATTEMPTS})"
         echo "──────────────────────────────────────────────"
