@@ -8,8 +8,8 @@ set -euo pipefail
 IMAGE="${1:-pmanagement-service:latest}"
 HOST_PORT="${2:-9081}"
 CONTAINER_NAME="pmanagement-service"
-HEALTH_URL="http://host.docker.internal:${HOST_PORT}/actuator/health"
-MAX_WAIT=90
+HEALTH_URL="http://${CONTAINER_NAME}:9081/actuator/health"
+MAX_WAIT=180
 POLL_INTERVAL=5
 
 echo "──────────────────────────────────────────────"
@@ -66,6 +66,7 @@ fi
 echo "[deploy] Starting container: ${CONTAINER_NAME}"
 docker run -d \
     --name "${CONTAINER_NAME}" \
+    --network cicd-network \
     --restart unless-stopped \
     -p "${HOST_PORT}:9081" \
     -e SPRING_PROFILES_ACTIVE=default \
