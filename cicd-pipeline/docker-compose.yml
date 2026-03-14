@@ -29,9 +29,18 @@ services:
       - jenkins_home:/var/jenkins_home
       # Allow Jenkins to control the HOST Docker daemon
       - /var/run/docker.sock:/var/run/docker.sock
+    # Load secrets from .env file (never committed to git – see .env.example)
+    env_file:
+      - ../.env
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
       - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+      # These are passed through to JCasC which interpolates ${VAR} placeholders
+      - SONAR_TOKEN
+      - GITHUB_TOKEN
+      - GITHUB_USERNAME
+      - GITHUB_WEBHOOK_SECRET
+      - JENKINS_ADMIN_PASSWORD
     networks:
       - cicd-network
     depends_on:

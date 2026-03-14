@@ -1,6 +1,11 @@
----
-# Jenkins Configuration as Code
+# =============================================================================
+# Jenkins Configuration as Code (JCasC)
 # Applied automatically on first boot – no setup wizard needed.
+#
+# ⚠️  SECRETS: All sensitive values are read from environment variables.
+#     Copy .env.example → .env, fill in values, then start Docker Compose.
+#     Never hard-code tokens here; this file IS committed to git.
+# =============================================================================
 
 jenkins:
   systemMessage: "Patient Management Service – CI/CD Pipeline"
@@ -13,7 +18,8 @@ jenkins:
       allowsSignup: false
       users:
         - id: "admin"
-          password: "admin"
+          # Read from JENKINS_ADMIN_PASSWORD env var (set in .env)
+          password: "${JENKINS_ADMIN_PASSWORD}"
           name: "Admin"
           properties:
             - mailer:
@@ -37,8 +43,6 @@ jenkins:
           - key: GITHUB_REPO_BRANCH
             value: "master"
 
-
-
 tool:
   maven:
     installations:
@@ -57,23 +61,37 @@ credentials:
   system:
     domainCredentials:
       - credentials:
-          # SonarQube analysis token (update after running sonar-setup.sh)
+          # ── SonarQube token ────────────────────────────────────────────────
+          # Value comes from SONAR_TOKEN env var (set in .env)
           - string:
               id: "SONAR_TOKEN"
-              secret: "squ_changeme_after_first_login"
+              secret: "${SONAR_TOKEN}"
               description: "SonarQube authentication token"
               scope: GLOBAL
 
-          # GitHub Personal Access Token
-          # Generate at: https://github.com/settings/tokens
-          # Required scopes: repo, admin:repo_hook
-          # Leave as-is if repo is public (token only needed for webhooks or private repos)
+          # ── GitHub Personal Access Token ───────────────────────────────────
+          # Value comes from GITHUB_USERNAME / GITHUB_TOKEN env vars (set in .env)
           - usernamePassword:
               id: "GITHUB_CREDENTIALS"
               description: "GitHub Personal Access Token"
+              username: "${GITHUB_USERNAME}"
+              password: "${GITHUB_TOKEN}"
+              scope: GLOBAL
+
+          # ── GitHub Webhook Secret ──────────────────────────────────────────
+          # Shared secret between GitHub and Jenkins for webhook validation.
+          # Value comes from GITHUB_WEBHOOK_SECRET env var (set in .env)
+          - string:
+              id: "GITHUB_WEBHOOK_SECRET"
+              secret: "${GITHUB_WEBHOOK_SECRET}"
+              description: "GitHub webhook secret for payload validation"
               scope: GLOBAL
 
 unclassified:
+  location:
+    url: "${JENKINS_URL}"
+    adminAddress: "admin@localhost"
+
   sonarGlobalConfiguration:
     buildWrapperEnabled: true
     installations:
@@ -81,13 +99,30 @@ unclassified:
         serverUrl: "http://sonarqube:9000"
         credentialsId: "SONAR_TOKEN"
 
+  # ── GitHub plugin global configuration ──────────────────────────────────────
+  # Enables Jenkins to receive and validate GitHub webhook payloads.
+  githubPluginConfig:
+    configs:
+      - name: "GitHub"
+        apiUrl: "https://api.github.com"
+        credentialsId: "GITHUB_CREDENTIALS"
+        manageHooks: false   # Set true only if you want Jenkins to auto-register hooks
+
   timestamper:
     allPipelines: true
 
 jobs:
   - script: >
       pipelineJob('pmanagement-service-pipeline') {
-        description('Patient Management Service – CI/CD pipeline. Click Build Now to run.')
+        description('Patient Management Service – CI/CD pipeline. Triggered automatically on push/merge to master.')
+
+        triggers {
+          githubPush()
+        }
+
+        properties {
+          githubProjectUrl('https://github.com/joeltadeu/tus-microservices-assignment-1/')
+        }
 
         definition {
           cpsScm {
