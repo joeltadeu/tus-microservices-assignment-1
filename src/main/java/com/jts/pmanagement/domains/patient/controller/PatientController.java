@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -325,8 +324,7 @@ public class PatientController implements PmsController {
     Page<Patient> patients = service.findAll(filter);
     log.info("Found [{}] results", patients.getTotalElements());
 
-    var fetchedList =
-        patients.stream().map(patientMapper::toPatientResponse).collect(Collectors.toList());
+    var fetchedList = patients.stream().map(patientMapper::toPatientResponse).toList();
 
     return new PageImpl<>(fetchedList, patients.getPageable(), patients.getTotalElements());
   }

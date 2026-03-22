@@ -1,4 +1,4 @@
-package com.jts.pmanagement.domains.patient.contoller;
+package com.jts.pmanagement.domains.patient.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jts.pmanagement.common.exception.NotFoundException;
-import com.jts.pmanagement.domains.patient.controller.PatientController;
 import com.jts.pmanagement.domains.patient.controller.mapper.PatientMapper;
 import com.jts.pmanagement.domains.patient.dto.PatientFilter;
 import com.jts.pmanagement.domains.patient.dto.PatientRequest;
