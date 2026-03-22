@@ -217,11 +217,14 @@ else
     && echo "✅  Gate assigned to project '${PROJECT_KEY}'"
 fi
 
+
 # ── Step 5: Generate analysis token ──────────────────────────────────────────
 echo ""
 echo "──────────────────────────────────────────────────────────────"
 echo " Step 5 – Generating SonarQube analysis token"
 echo "──────────────────────────────────────────────────────────────"
+
+SONAR_AUTH="admin:${SONAR_NEW_PASSWORD}"
 
 TOKEN_RESPONSE=$(curl -sf -u "${SONAR_AUTH}" \
   -X POST "${SONAR_URL}/api/user_tokens/generate" \
@@ -235,7 +238,6 @@ if [[ -z "${SONAR_TOKEN_VALUE}" ]]; then
   echo "    → ${SONAR_URL} → My Account → Security → Generate Token"
   echo "    → Paste the value as SONAR_TOKEN in your .env and re-run."
   echo ""
-  # Cannot proceed to push token into Jenkins – bail gracefully
   _TOKEN_AVAILABLE=false
 else
   echo "✅  Token generated"
@@ -249,13 +251,17 @@ echo " Step 6 – Updating Jenkins credential '${JENKINS_CREDENTIAL_ID}'"
 echo "──────────────────────────────────────────────────────────────"
 
 if [[ "${_TOKEN_AVAILABLE}" == "false" ]]; then
-  echo "⚠️   Skipping Jenkins update – no token available (see Step 5)."
+  echo "⚠️   Skipping Jenkins update – no token available (see Step 1)."
 else
   JENKINS_AUTH="${JENKINS_ADMIN_USERNAME}:${JENKINS_ADMIN_PASSWORD}"
 
-  # ── 6a: Obtain a crumb (CSRF protection) ────────────────────────────────────
+  # ── Obtain a crumb (CSRF protection) ────────────────────────────────────────
   echo "ℹ️   Fetching Jenkins crumb..."
+
+  COOKIE_JAR=$(mktemp)
+
   CRUMB_RESPONSE=$(curl -sf -u "${JENKINS_AUTH}" \
+    -c "${COOKIE_JAR}" \
     "${JENKINS_URL}/crumbIssuer/api/json" 2>/dev/null || true)
 
   CRUMB_FIELD=$(echo "${CRUMB_RESPONSE}" | jq -r '.crumbRequestField // empty' 2>/dev/null || true)
@@ -267,13 +273,14 @@ else
     echo "    Skipping automatic Jenkins update."
     echo "    → Update SONAR_TOKEN in .env and restart Jenkins manually:"
     echo "        cd cicd-pipeline && docker compose restart jenkins"
+    rm -f "${COOKIE_JAR}"
     _JENKINS_UPDATED=false
   else
     echo "✅  Crumb obtained"
 
-    # ── 6b: Execute Groovy script to update the credential in-place ─────────────
-    # The script locates the existing StringCredentialsImpl with id=SONAR_TOKEN
-    # and replaces its secret — no container restart required.
+    # ── Execute Groovy script to update the credential in-place ─────────────
+    # Bash expands ${JENKINS_CREDENTIAL_ID} and ${SONAR_TOKEN_VALUE} here.
+    # All other $ references are Groovy variables — escaped so bash ignores them.
     GROOVY_SCRIPT=$(cat <<GROOVY
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl
@@ -286,7 +293,6 @@ def newSecret    = '${SONAR_TOKEN_VALUE}'
 def store  = SystemCredentialsProvider.getInstance().getStore()
 def domain = com.cloudbees.plugins.credentials.domains.Domain.global()
 
-// Find the existing credential
 def existing = com.cloudbees.plugins.credentials.CredentialsProvider
     .lookupCredentials(StringCredentialsImpl, Jenkins.instance, null, null)
     .find { it.id == credentialId }
@@ -299,9 +305,9 @@ if (existing) {
         Secret.fromString(newSecret)
     )
     store.updateCredentials(domain, existing, updated)
-    println "SUCCESS: credential '${credentialId}' updated in-place"
+    println "SUCCESS: credential '${JENKINS_CREDENTIAL_ID}' updated in-place"
 } else {
-    println "WARNING: credential '${credentialId}' not found – creating it"
+    println "WARNING: credential '${JENKINS_CREDENTIAL_ID}' not found – creating it"
     def created = new StringCredentialsImpl(
         CredentialsScope.GLOBAL,
         credentialId,
@@ -309,16 +315,19 @@ if (existing) {
         Secret.fromString(newSecret)
     )
     store.addCredentials(domain, created)
-    println "SUCCESS: credential '${credentialId}' created"
+    println "SUCCESS: credential '${JENKINS_CREDENTIAL_ID}' created"
 }
 GROOVY
 )
 
     SCRIPT_OUTPUT=$(curl -s \
       -u "${JENKINS_AUTH}" \
+      -b "${COOKIE_JAR}" \
       -H "${CRUMB_FIELD}: ${CRUMB_VALUE}" \
       -X POST "${JENKINS_URL}/scriptText" \
       --data-urlencode "script=${GROOVY_SCRIPT}" 2>/dev/null || true)
+
+    rm -f "${COOKIE_JAR}"
 
     if echo "${SCRIPT_OUTPUT}" | grep -q "^SUCCESS"; then
       echo "✅  ${SCRIPT_OUTPUT}"
@@ -336,10 +345,30 @@ GROOVY
   fi
 fi
 
-# ── Step 7: Register SonarQube → Jenkins webhook ─────────────────────────────
+# ── Step 7: Update SONAR_TOKEN in .env ───────────────────────────────────────
 echo ""
 echo "──────────────────────────────────────────────────────────────"
-echo " Step 7 – Registering Jenkins webhook in SonarQube"
+echo " Step 7 – Updating SONAR_TOKEN in .env"
+echo "──────────────────────────────────────────────────────────────"
+
+if [[ "${_TOKEN_AVAILABLE}" == "true" ]]; then
+  if grep -q '^SONAR_TOKEN=' "${ENV_FILE}"; then
+    sed -i "s|^SONAR_TOKEN=.*|SONAR_TOKEN=${SONAR_TOKEN_VALUE}|" "${ENV_FILE}"
+    echo "✅  SONAR_TOKEN updated in .env"
+  else
+    echo "SONAR_TOKEN=${SONAR_TOKEN_VALUE}" >> "${ENV_FILE}"
+    echo "✅  SONAR_TOKEN appended to .env"
+  fi
+else
+  echo "⚠️   Skipping .env update – no token was generated."
+fi
+
+
+
+# ── Step 8: Register SonarQube → Jenkins webhook ─────────────────────────────
+echo ""
+echo "──────────────────────────────────────────────────────────────"
+echo " Step 8 – Registering Jenkins webhook in SonarQube"
 echo "──────────────────────────────────────────────────────────────"
 
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
@@ -369,7 +398,7 @@ if [[ "${_TOKEN_AVAILABLE}" == "true" ]]; then
     echo "  ✅  SONAR_TOKEN was pushed directly into Jenkins credentials."
     echo "      No restart required – the pipeline is ready to run."
     echo ""
-    echo "  ℹ️   Optionally keep your .env in sync by updating:"
+    echo "  ✅  SONAR_TOKEN was updated directly into .env with the value:"
     echo "      SONAR_TOKEN=${SONAR_TOKEN_VALUE}"
   else
     echo "  ⚠️   SONAR_TOKEN was generated but could NOT be pushed to Jenkins."
